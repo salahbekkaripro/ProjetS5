@@ -25,8 +25,11 @@ SECRET_KEY = 'django-insecure-553kynu%hk6v--2jl%%bz2_1h_6=!*n+r1i(mw31i=11=!v7g7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'fittrackr-97lq.onrender.com'
+]
 
 # Application definition
 
