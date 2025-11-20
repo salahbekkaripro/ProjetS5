@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Historique des abonnements</h1>
+{% for sub in subscriptions %}
+    <div class="card">
+        <strong>{{ sub.plan.name }}</strong> - du {{ sub.start_date }} {% if sub.end_date %}au {{ sub.end_date }}{% endif %}
+        <div>Actif : {{ sub.active }}</div>
+    </div>
+{% empty %}
+    <p>Aucun abonnement.</p>
+{% endfor %}
+{% endblock %}

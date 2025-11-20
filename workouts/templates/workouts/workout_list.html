@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h1 class="mb-0">Calendrier des workouts</h1>
+        <p class="text-muted mb-0">Visualise tes séances dans le mois, clique pour voir ou éditer.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 ms-auto">
+        <a class="btn btn-outline-light btn-sm" href="?year={{ prev_year }}&month={{ prev_month }}">‹ Mois précédent</a>
+        <span class="pill pill-ghost">{{ current_label }}</span>
+        <a class="btn btn-outline-light btn-sm" href="?year={{ next_year }}&month={{ next_month }}">Mois suivant ›</a>
+        <a class="btn btn-primary btn-sm" href="{% url 'workouts:workout_create' %}">+ Nouvelle séance</a>
+    </div>
+</div>
+
+<div class="card p-3 mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <input type="hidden" name="month" value="{{ current_month }}">
+        <input type="hidden" name="year" value="{{ current_year }}">
+        <div class="col-md-3">
+            {{ form.date_from.label_tag }}{{ form.date_from }}
+        </div>
+        <div class="col-md-3">
+            {{ form.date_to.label_tag }}{{ form.date_to }}
+        </div>
+        <div class="col-md-3">
+            {{ form.muscle_group.label_tag }}{{ form.muscle_group }}
+        </div>
+        <div class="col-md-2">
+            {{ form.workout_type.label_tag }}{{ form.workout_type }}
+        </div>
+        <div class="col-md-1 d-grid">
+            <button class="btn btn-primary btn-sm" type="submit">Filtrer</button>
+        </div>
+    </form>
+</div>
+
+<div class="calendar-grid mb-4">
+    <div class="calendar-head">Lun</div>
+    <div class="calendar-head">Mar</div>
+    <div class="calendar-head">Mer</div>
+    <div class="calendar-head">Jeu</div>
+    <div class="calendar-head">Ven</div>
+    <div class="calendar-head">Sam</div>
+    <div class="calendar-head">Dim</div>
+    {% for week in weeks %}
+        {% for day in week %}
+            <div class="calendar-cell {% if not day.in_month %}muted{% endif %}">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="day-number">{{ day.date.day }}</span>
+                    {% if day.workouts %}
+                        <span class="tag">{{ day.workouts|length }} séance{{ day.workouts|length|pluralize:"s" }}</span>
+                    {% endif %}
+                </div>
+                <div class="small">
+                    {% for w in day.workouts %}
+                        <div class="calendar-item">
+                            <div class="fw-semibold">{{ w.title }}</div>
+                            <div class="text-muted small">{{ w.get_workout_type_display }} · Sets {{ w.sets.count }}</div>
+                            <div class="d-flex gap-1 mt-1">
+                                <a class="btn btn-outline-light btn-sm" href="{% url 'workouts:workout_detail' w.pk %}">Voir</a>
+                                <a class="btn btn-outline-light btn-sm" href="{% url 'workouts:workout_update' w.pk %}">Editer</a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-muted small">-</div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% if workouts|length == 0 %}
+    <p class="text-muted">Aucune séance ce mois-ci.</p>
+{% endif %}
+{% endblock %}

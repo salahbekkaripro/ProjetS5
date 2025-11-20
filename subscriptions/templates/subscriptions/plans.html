@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Abonnements</h1>
+<div class="flex">
+{% for plan in plans %}
+    <div class="card" style="min-width:240px;">
+        <h3>{{ plan.name }}</h3>
+        <p>{{ plan.description }}</p>
+        {% if plan.price %}
+            <p><strong>{{ plan.price }} € / mois</strong></p>
+        {% else %}
+            <p>Gratuit</p>
+        {% endif %}
+        {% if plan.workout_limit_per_week %}<p>Limite: {{ plan.workout_limit_per_week }} workouts/semaine</p>{% endif %}
+        {% if plan.features %}<p>{{ plan.features }}</p>{% endif %}
+        {% if current and current.plan_id == plan.id and current.is_current %}
+            <button class="btn secondary" disabled>Plan actuel</button>
+        {% else %}
+            <a class="btn" href="{% url 'subscriptions:switch' plan.code %}">Choisir</a>
+        {% endif %}
+    </div>
+{% endfor %}
+</div>
+<p><a class="btn secondary" href="{% url 'subscriptions:history' %}">Historique</a></p>
+{% endblock %}

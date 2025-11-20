@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-0">{{ program.title }}</h1>
+        <p class="text-muted">{{ program.description }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="{% url 'programs:assign_program' program.pk %}">Assigner</a>
+        {% if program.created_by == request.user %}
+            <a class="btn btn-outline-light" href="{% url 'programs:program_update' program.pk %}">Editer</a>
+            <a class="btn btn-outline-light" href="{% url 'programs:add_program_exercise' program.pk %}">Ajouter un exercice</a>
+        {% endif %}
+    </div>
+</div>
+<div class="card p-3 mb-3">
+    <div class="d-flex gap-2 mb-2">
+        <span class="badge bg-secondary">{{ program.get_program_type_display }}</span>
+        <span class="badge bg-dark">Niveau : {{ program.level }}</span>
+    </div>
+    <h5>Plan</h5>
+    {% for pe in program.program_exercises.all %}
+        <div class="border-bottom border-secondary-subtle py-2">
+            <strong>Jour {{ pe.day }} :</strong> {{ pe.exercise.name }} — {{ pe.sets }} x {{ pe.reps }}
+            {% if pe.notes %}<div class="text-muted">{{ pe.notes }}</div>{% endif %}
+        </div>
+    {% empty %}
+        <p class="text-muted">Aucun exercice défini.</p>
+    {% endfor %}
+</div>
+<div class="card p-3">
+    <h5>Mes assignations</h5>
+    {% for a in assignments %}
+        <div class="d-flex justify-content-between py-2 border-bottom border-secondary-subtle">
+            <div>Début : {{ a.start_date }} — Actif : {{ a.active }}</div>
+            {% if a.active %}<span class="badge bg-success">En cours</span>{% endif %}
+        </div>
+    {% empty %}
+        <p class="text-muted">Non assigné.</p>
+    {% endfor %}
+</div>
+{% endblock %}

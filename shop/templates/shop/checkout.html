@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Checkout</h1>
+<div class="card">
+    <p>Sous-total : {{ cart.total }} €</p>
+    {% if discount_rate and discount_rate > 0 %}<p>Réduction abonnement : -{{ discount_percent }}%</p>{% endif %}
+    <h5>Total : {{ discounted_total }} €</h5>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Valider la commande</button>
+    </form>
+</div>
+{% endblock %}

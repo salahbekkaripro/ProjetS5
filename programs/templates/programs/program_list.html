@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-0">Programmes</h1>
+        <p class="text-muted">Pré-définis et personnalisés</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'programs:program_create' %}">Nouveau programme (Pro)</a>
+</div>
+<div class="row g-3">
+    {% for program in programs %}
+    <div class="col-md-6">
+        <div class="card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">{{ program.title }}</h5>
+                {% if program.is_predefined %}<span class="badge-plan">Prédef</span>{% endif %}
+            </div>
+            <p class="text-muted">{{ program.description|default:'-' }}</p>
+            <div class="d-flex gap-2 align-items-center">
+                <span class="badge bg-secondary">{{ program.get_program_type_display }}</span>
+                <span class="badge bg-dark">Niveau : {{ program.level }}</span>
+            </div>
+            <div class="mt-3 d-flex gap-2">
+                <a class="btn btn-outline-light btn-sm" href="{% url 'programs:program_detail' program.pk %}">Voir</a>
+                <a class="btn btn-primary btn-sm" href="{% url 'programs:assign_program' program.pk %}">Assigner</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>Aucun programme.</p>
+    {% endfor %}
+</div>
+{% endblock %}

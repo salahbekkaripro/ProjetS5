@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Dashboard Admin</h1>
+<p class="text-muted">Vue synthèse pour staff</p>
+<div class="row g-3 mb-3">
+    <div class="col-md-2"><div class="card p-3 text-center"><div class="text-muted">Utilisateurs</div><div class="fs-4 fw-bold">{{ stats.user_count }}</div></div></div>
+    <div class="col-md-2"><div class="card p-3 text-center"><div class="text-muted">Abonnements actifs</div><div class="fs-4 fw-bold">{{ stats.active_subs }}</div></div></div>
+    <div class="col-md-2"><div class="card p-3 text-center"><div class="text-muted">Commandes</div><div class="fs-4 fw-bold">{{ stats.orders_count }}</div></div></div>
+    <div class="col-md-2"><div class="card p-3 text-center"><div class="text-muted">CA estimé</div><div class="fs-4 fw-bold">{{ stats.revenue }} €</div></div></div>
+    <div class="col-md-2"><div class="card p-3 text-center"><div class="text-muted">Produits</div><div class="fs-4 fw-bold">{{ stats.products_count }}</div></div></div>
+    <div class="col-md-2"><div class="card p-3 text-center"><div class="text-muted">Listings ouverts</div><div class="fs-4 fw-bold">{{ stats.listings_open }}</div></div></div>
+</div>
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card p-3 h-100">
+            <h5>Derniers utilisateurs</h5>
+            {% for u in latest_users %}
+                <div class="d-flex justify-content-between border-bottom border-secondary-subtle py-2">
+                    <div>{{ u.email }}</div>
+                    <span class="text-muted small">{{ u.date_joined }}</span>
+                </div>
+            {% empty %}<p class="text-muted">Aucun utilisateur.</p>{% endfor %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-3 h-100">
+            <h5>Commandes récentes</h5>
+            {% for o in recent_orders %}
+                <div class="d-flex justify-content-between border-bottom border-secondary-subtle py-2">
+                    <div>#{{ o.id }} — {{ o.email }}</div>
+                    <div>{{ o.total }} €</div>
+                </div>
+            {% empty %}<p class="text-muted">Pas de commande.</p>{% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

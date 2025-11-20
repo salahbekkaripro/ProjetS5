@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card card-hover p-3 p-lg-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="section-title d-flex align-items-center gap-2">
+                    <i class="bi bi-chat-dots text-primary"></i> Messagerie
+                </div>
+            </div>
+            <form class="row g-2 mb-3" method="post" action="{% url 'messaging:send_friend_request' %}">
+                {% csrf_token %}
+                <div class="col-12 col-md-9">
+                    {{ friend_form.identifier }}
+                </div>
+                <div class="col-12 col-md-3">
+                    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-person-plus me-1"></i> Ajouter</button>
+                </div>
+            </form>
+
+            <h6 class="text-muted fw-semibold mb-2">Amis</h6>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                {% for friend in friends %}
+                    <a class="pill pill-ghost text-decoration-none" href="{% url 'messaging:conversation' friend.id %}">
+                        <i class="bi bi-person-circle me-1"></i>{{ friend.full_name|default:friend.email }}
+                    </a>
+                {% empty %}
+                    <span class="text-muted">Aucun ami pour l'instant.</span>
+                {% endfor %}
+            </div>
+
+            <h6 class="text-muted fw-semibold mb-2">Messages récents</h6>
+            <div class="list-group list-group-flush">
+                {% for msg in recent_messages %}
+                    {% if msg.sender == request.user %}
+                        {% with other=msg.receiver %}
+                            <a class="list-group-item list-group-item-action d-flex justify-content-between" href="{% url 'messaging:conversation' other.id %}">
+                                <div>
+                                    <strong>{{ other.full_name|default:other.email }}</strong>
+                                    <div class="text-muted small">{{ msg.body|truncatechars:80 }}</div>
+                                </div>
+                                <span class="text-muted small">{{ msg.created_at|date:"d/m H:i" }}</span>
+                            </a>
+                        {% endwith %}
+                    {% else %}
+                        {% with other=msg.sender %}
+                            <a class="list-group-item list-group-item-action d-flex justify-content-between" href="{% url 'messaging:conversation' other.id %}">
+                                <div>
+                                    <strong>{{ other.full_name|default:other.email }}</strong>
+                                    <div class="text-muted small">{{ msg.body|truncatechars:80 }}</div>
+                                </div>
+                                <span class="text-muted small">{{ msg.created_at|date:"d/m H:i" }}</span>
+                            </a>
+                        {% endwith %}
+                    {% endif %}
+                {% empty %}
+                    <div class="text-muted small">Pas de messages encore.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card card-hover p-3 p-lg-4">
+            <div class="section-title d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-envelope-open text-primary"></i> Demandes d'amis
+            </div>
+            <div class="mb-3">
+                <div class="text-muted small fw-semibold mb-1">En attente pour vous</div>
+                {% for fr in incoming_requests %}
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <span><i class="bi bi-person-plus me-1"></i>{{ fr.sender.full_name|default:fr.sender.email }}</span>
+                        <div class="btn-group btn-group-sm">
+                            <a class="btn btn-primary" href="{% url 'messaging:accept_friend_request' fr.id %}">Accepter</a>
+                            <a class="btn btn-ghost" href="{% url 'messaging:decline_friend_request' fr.id %}">Refuser</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-muted small">Aucune demande.</div>
+                {% endfor %}
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold mb-1">Demandes envoyées</div>
+                {% for fr in sent_requests %}
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <span><i class="bi bi-hourglass me-1"></i>{{ fr.receiver.full_name|default:fr.receiver.email }}</span>
+                        <span class="text-muted small">En attente</span>
+                    </div>
+                {% empty %}
+                    <div class="text-muted small">Rien en cours.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

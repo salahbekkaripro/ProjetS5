@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero-panel card card-hover p-4 p-lg-5 mb-4">
+    <div class="row g-4 align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge-plan">Dashboard</span>
+                <span class="pill pill-ghost">Plan : {% if subscription %}{{ subscription.plan.name }}{% else %}Free{% endif %}</span>
+                <span class="pill pill-ghost">30j : {{ workouts_count }} séances</span>
+                {% if overtraining_flag %}<span class="pill pill-warning">Fatigue {{ risk_info.risk|floatformat:2 }}</span>{% endif %}
+            </div>
+            <h1 class="mb-3 display-5 fw-bold">Salut {{ request.user.first_name|default:request.user.email }}, ton cockpit est prêt.</h1>
+            <p class="text-muted lead mb-4">Suivi temps réel, IA et objectifs dans une vue épurée. Continue à logger tes sets pour affiner les 1RM et les recommandations.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary btn-sm" href="{% url 'workouts:workout_create' %}"><i class="bi bi-dumbbell me-1"></i> Nouvelle séance</a>
+                <a class="btn btn-ghost btn-sm" href="{% url 'workouts:goal_list' %}"><i class="bi bi-bullseye me-1"></i> Objectifs</a>
+                <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:ai_chat' %}"><i class="bi bi-stars me-1"></i> Chat IA</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mini-panel p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small fw-semibold">En un coup d'œil</div>
+                    <span class="tag">Live</span>
+                </div>
+                <div class="mt-2">
+                    {% if trends %}
+                        {% with t=trends.0 %}
+                            <div class="fw-semibold">Top 1RM : {{ t.exercise }}</div>
+                            <div class="text-muted small">Actuel {{ t.current }} kg · Prévu 7j {{ t.pred }} kg</div>
+                        {% endwith %}
+                    {% else %}
+                        <div class="text-muted small">Logge des séances chargées pour que je calcule tes 1RM.</div>
+                    {% endif %}
+                </div>
+                <div class="mt-3">
+                    <div class="text-muted small">Streak · Points</div>
+                    <div class="fw-semibold">{{ gamification.streak_current|default:"0" }} j — {{ gamification.points|default:"0" }} pts</div>
+                    {% if gamification %}<div class="text-muted small">Niveau {{ gamification.level }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="kpi-card card-hover">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="kpi-label">Points</div>
+                <div class="kpi-icon kpi-icon-points"><i class="bi bi-lightning-charge-fill"></i></div>
+            </div>
+            <div class="kpi-value">{{ gamification.points|default:"0" }}</div>
+            <div class="kpi-sub">Niveau {{ gamification.level|default:"1" }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="kpi-card card-hover">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="kpi-label">Workouts (7j)</div>
+                <div class="kpi-icon kpi-icon-workouts"><i class="bi bi-activity"></i></div>
+            </div>
+            <div class="kpi-value">{{ workouts_count }}</div>
+            <div class="kpi-sub">Volume {{ volume_week }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="kpi-card card-hover">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="kpi-label">Streak</div>
+                <div class="kpi-icon kpi-icon-streak"><i class="bi bi-flame-fill"></i></div>
+            </div>
+            <div class="kpi-value">{{ gamification.streak_current|default:"0" }} j</div>
+            <div class="kpi-sub">Best {{ gamification.streak_best|default:"0" }} j</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="kpi-card card-hover">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="kpi-label">Badges</div>
+                <div class="kpi-icon kpi-icon-badges"><i class="bi bi-trophy-fill"></i></div>
+            </div>
+            <div class="kpi-value">{{ badges|length }}</div>
+            <div class="kpi-sub">Objectifs actifs {{ goals|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-5">
+        <div class="card card-hover p-3 p-lg-4 h-100">
+            <div class="section-title d-flex align-items-center gap-2">
+                <i class="bi bi-activity text-primary"></i> Charge & récupération
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary-subtle">
+                <span class="text-muted">Workouts 7j</span>
+                <span class="fw-semibold">{{ workouts_count }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary-subtle">
+                <span class="text-muted">Volume (reps)</span>
+                <span class="fw-semibold">{{ volume_week }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-2">
+                <span class="text-muted small">Volume semaine -1</span>
+                <span class="text-muted small fw-semibold">{{ volume_prev }}</span>
+            </div>
+            {% if overtraining_flag %}
+                <div class="alert alert-warning py-2 mt-2 mb-0">Risque de surcharge ({{ risk_info.risk|floatformat:2 }}). Baisse le volume ou ajoute du repos.</div>
+            {% else %}
+                <div class="text-muted small mt-2">Charge maîtrisée. Reste en RPE 7-8 et dors suffisamment.</div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card card-hover p-3 p-lg-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="section-title d-flex align-items-center gap-2">
+                    <i class="bi bi-magic text-primary"></i> Recommandations IA
+                </div>
+                {% if risk_info.reason %}<span class="tag">{{ risk_info.reason }}</span>{% endif %}
+            </div>
+            <ul class="list-minimal">
+                {% for rec in recommendations %}
+                    <li class="d-flex justify-content-between align-items-center py-2 px-1 rounded-3">
+                        <div class="text-muted small">Travaille davantage</div>
+                        <div class="fw-semibold">{{ rec.exercise__muscle_group }} · {{ rec.count }} sets/30j</div>
+                    </li>
+                {% empty %}
+                    <li class="text-muted py-2">Pas assez de données pour recommander un focus.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-7">
+        <div class="card card-hover p-3 p-lg-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="section-title d-flex align-items-center gap-2">
+                    <i class="bi bi-calendar-week text-primary"></i> Dernières séances
+                </div>
+                <a class="btn btn-ghost btn-sm" href="{% url 'workouts:workout_list' %}">Voir tout</a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for w in workouts %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ w.title }}</strong>
+                            <div class="text-muted small">{{ w.date }}</div>
+                        </div>
+                        <div class="text-end text-muted small">Sets {{ w.sets.count }} · Volume {{ w.total_volume }}</div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted mb-0">Aucune séance récente.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card card-hover p-3 p-lg-4 h-100">
+            <div class="section-title d-flex align-items-center gap-2">
+                <i class="bi bi-award text-primary"></i> Objectifs & badges
+            </div>
+            <div class="mb-3">
+                <div class="text-muted small mb-2 fw-semibold">Objectifs actifs</div>
+                {% for goal in goals %}
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between small">
+                            <span class="fw-semibold">{{ goal.title }}</span>
+                            <span class="text-muted fw-bold">{{ goal.progress_percent }}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: {{ goal.progress_percent }}%" aria-valuenow="{{ goal.progress_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted mb-2">Définis tes objectifs pour suivre tes PR.</p>
+                {% endfor %}
+            </div>
+            <div class="text-muted small mb-2 fw-semibold">Badges</div>
+            <div class="d-flex flex-wrap gap-2">
+                {% for ub in badges %}
+                    <span class="pill pill-ghost"><i class="bi bi-patch-check-fill me-1"></i>{{ ub.badge.title }}</span>
+                {% empty %}
+                    <p class="text-muted mb-0">Commence à t'entraîner pour débloquer des badges.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card card-hover p-3 p-lg-4 h-100">
+            <div class="section-title d-flex align-items-center gap-2">
+                <i class="bi bi-bullseye text-primary"></i> Focus musculaire
+            </div>
+            <div class="text-muted small mb-2 fw-semibold">Points forts</div>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                {% for item in strengths %}
+                    <span class="chip chip-soft">{{ item.exercise__muscle_group }} · {{ item.count }} sets</span>
+                {% empty %}
+                    <span class="text-muted">Pas de données.</span>
+                {% endfor %}
+            </div>
+            <div class="text-muted small mb-2 fw-semibold">Points faibles</div>
+            <div class="d-flex flex-wrap gap-2">
+                {% for item in weaknesses %}
+                    <span class="chip">{{ item.exercise__muscle_group }} · {{ item.count }} sets</span>
+                {% empty %}
+                    <span class="text-muted">Pas de données.</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-hover p-3 p-lg-4 h-100">
+            <div class="section-title d-flex align-items-center gap-2">
+                <i class="bi bi-graph-up text-primary"></i> Tendance 1RM
+            </div>
+            {% if trends %}
+                <div class="list-group list-group-flush">
+                    {% for t in trends %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="fw-semibold">{{ t.exercise }}</div>
+                            <div class="text-muted small text-end">Actuel {{ t.current }} kg · Prévu 7j {{ t.pred }} kg {% if t.slope %} (pente {{ t.slope }}){% endif %}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">Pas assez de données pour estimer les tendances 1RM.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card card-hover p-3 p-lg-4 h-100">
+            <div class="section-title">Volume (Fit+)</div>
+            {% if subscription and subscription.plan.level|default:0 >= 2 %}
+                <img src="{% url 'charts:volume_per_week' %}" alt="Volume par semaine" class="img-fluid rounded-3 border border-dark-subtle">
+            {% else %}
+                <p class="text-muted mb-0">Disponible avec le plan Fit+.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-hover p-3 p-lg-4 h-100">
+            <div class="section-title">Fréquence muscles (Fit+)</div>
+            {% if subscription and subscription.plan.level|default:0 >= 2 %}
+                <img src="{% url 'charts:muscle_frequency' %}" alt="Fréquence muscle" class="img-fluid rounded-3 border border-dark-subtle">
+            {% else %}
+                <p class="text-muted mb-0">Disponible avec le plan Fit+.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-hover p-3 p-lg-4 h-100">
+            <div class="section-title">Top 1RM (Pro)</div>
+            {% if subscription and subscription.plan.level|default:0 >= 3 %}
+                <img src="{% url 'charts:one_rm_best' %}" alt="1RM estimés" class="img-fluid rounded-3 border border-dark-subtle">
+            {% else %}
+                <p class="text-muted mb-0">Disponible avec le plan Pro.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

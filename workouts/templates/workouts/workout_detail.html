@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex-between">
+    <h1>{{ workout.title }} - {{ workout.date }}</h1>
+    <div>
+        <a class="btn secondary" href="{% url 'workouts:workout_update' workout.pk %}">Editer</a>
+        <a class="btn secondary" href="{% url 'workouts:workout_export' workout.pk %}">Export PDF (Pro)</a>
+        <a class="btn secondary" href="{% url 'workouts:workout_delete' workout.pk %}">Supprimer</a>
+    </div>
+</div>
+<p>Type : {{ workout.get_workout_type_display }} | Notes : {{ workout.notes }}</p>
+<h3>Sets</h3>
+{% for set in sets %}
+    <div class="card">
+        <strong>{{ set.exercise.name }}</strong> ({{ set.exercise.get_muscle_group_display }}) - Set {{ set.set_number }}
+        <div>Reps: {{ set.reps }} | Poids: {{ set.weight }} | Temps: {{ set.duration_seconds }}s | Volume: {{ set.volume }}</div>
+        <div>{{ set.notes }}</div>
+    </div>
+{% empty %}
+    <p>Pas encore de sets.</p>
+{% endfor %}
+<div class="card">
+    <h4>Ajouter un set</h4>
+    <form method="post">
+        {% csrf_token %}
+        {{ set_form.as_p }}
+        <button type="submit">Ajouter</button>
+    </form>
+</div>
+{% endblock %}

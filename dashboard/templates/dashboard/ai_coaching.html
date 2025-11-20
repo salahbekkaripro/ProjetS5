@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Coaching IA (Ultra)</h1>
+<div class="card">
+    {% for tip in tips %}
+        <p>- {{ tip }}</p>
+    {% endfor %}
+</div>
+{% endblock %}

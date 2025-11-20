@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ product.name }}</h1>
+<div class="card">
+    <p>{{ product.description }}</p>
+    <p><strong>{{ product.price }} €</strong></p>
+    <a class="btn" href="{% url 'shop:add_to_cart' product.pk %}">Ajouter au panier</a>
+</div>
+{% endblock %}

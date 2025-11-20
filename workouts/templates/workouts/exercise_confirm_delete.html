@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Supprimer {{ exercise.name }} ?</h1>
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirmer</button>
+    </form>
+</div>
+{% endblock %}

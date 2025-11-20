@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Panier</h1>
+<div class="card">
+    {% for item in cart %}
+        <div class="flex-between">
+            <div>{{ item.product.name }} ({{ item.quantity }})</div>
+            <div>
+                {{ item.subtotal }} €
+                <a class="btn secondary" href="{% url 'shop:remove_from_cart' item.product.id %}">Retirer</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>Panier vide.</p>
+    {% endfor %}
+    <div class="mt-2">
+        <p>Sous-total : {{ cart.total }} €</p>
+        {% if discount_rate and discount_rate > 0 %}<p>Réduction abonnement : -{{ discount_percent }}%</p>{% endif %}
+        <h5>Total : {{ discounted_total }} €</h5>
+    </div>
+    <a class="btn" href="{% url 'shop:checkout' %}">Checkout</a>
+</div>
+{% endblock %}

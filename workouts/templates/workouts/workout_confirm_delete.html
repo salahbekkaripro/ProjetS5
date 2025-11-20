@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Supprimer {{ workout.title }} ?</h1>
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        <p>Cette action est définitive.</p>
+        <button type="submit">Confirmer</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Assistant IA FitTrackR</h1>
+<p class="text-muted">Analyses locales : 1RM, surentraînement et recommandations d'exercices basées sur tes données (aucun appel externe).</p>
+<div class="alert alert-info small mb-3">
+    Idées de questions : "mon 1rm au squat ?", "je suis fatigué", "que travailler cette semaine ?", "fais-moi un bilan".
+    Les réponses utilisent tes séances récentes et tes groupes musculaires forts/faibles.
+</div>
+<div class="card p-3 mb-3">
+    <form method="post" class="d-flex flex-column gap-2">
+        {% csrf_token %}
+        <textarea class="form-control" name="message" rows="3" placeholder="Pose ta question (ex: risque de surentraînement ?)"></textarea>
+        <div><button class="btn btn-primary" type="submit">Envoyer</button></div>
+    </form>
+</div>
+<div class="card p-3">
+    <h5>Historique</h5>
+    {% for m in history %}
+        <div class="border-bottom border-secondary-subtle py-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small">{{ m.role|title }}</div>
+                {% if m.intent %}
+                    <span class="badge text-bg-secondary">{{ m.intent }}</span>
+                {% endif %}
+            </div>
+            <div>{{ m.text }}</div>
+            {% if m.score %}
+                <div class="text-muted small">Confiance : {{ m.score }}</div>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p class="text-muted">Discute pour voir les réponses centrées sur tes stats.</p>
+    {% endfor %}
+</div>
+{% endblock %}

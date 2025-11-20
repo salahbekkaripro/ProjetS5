@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Profil</h1>
+<div class="card">
+    <p>Email : {{ request.user.email }}</p>
+    {% if subscription %}
+        <p>Plan actuel : {{ subscription.plan.name }}</p>
+    {% else %}
+        <p>Aucun abonnement actif.</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Mettre à jour</button>
+    </form>
+</div>
+{% endblock %}

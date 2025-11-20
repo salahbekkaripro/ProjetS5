@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-0">{{ listing.title }}</h1>
+        <p class="text-muted">{{ listing.get_condition_display }} — {{ listing.price }} €</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if listing.available %}<span class="badge bg-success">Disponible</span>{% else %}<span class="badge bg-secondary">Clôturé</span>{% endif %}
+        {% if listing.seller == request.user and listing.available %}
+            <a class="btn btn-outline-light btn-sm" href="{% url 'shop:marketplace_close' listing.pk %}">Clôturer</a>
+        {% endif %}
+    </div>
+</div>
+<div class="card p-3 mb-3">
+    <div class="d-flex justify-content-between">
+        <div class="text-muted small mb-2">Vendeur : {{ listing.seller.full_name|default:listing.seller.email }}</div>
+        {% if avg_score %}<div class="text-muted small">Note moyenne : {{ avg_score|floatformat:1 }}/5</div>{% endif %}
+    </div>
+    <p>{{ listing.description }}</p>
+</div>
+<div class="card p-3">
+    <h5>Messages</h5>
+    <form method="post" class="mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="message">
+        {{ form.as_p }}
+        <button class="btn btn-primary btn-sm" type="submit">Envoyer</button>
+    </form>
+    {% for m in messages %}
+        <div class="border-bottom border-secondary-subtle py-2">
+            <div class="text-muted small">{{ m.sender.full_name|default:m.sender.email }} — {{ m.created_at }}</div>
+            <div>{{ m.content }}</div>
+        </div>
+    {% empty %}
+        <p class="text-muted">Aucun message.</p>
+    {% endfor %}
+</div>
+<div class="card p-3 mt-3">
+    <h5>Notes et avis</h5>
+    {% if existing_rating %}
+        <p class="text-muted">Vous avez noté : {{ existing_rating.score }}/5</p>
+    {% else %}
+        <form method="post" class="mb-3">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="rating">
+            {{ rating_form.as_p }}
+            <button class="btn btn-outline-light btn-sm" type="submit">Publier l'avis</button>
+        </form>
+    {% endif %}
+    {% for r in ratings %}
+        <div class="border-bottom border-secondary-subtle py-2">
+            <div class="text-muted small">{{ r.buyer.full_name|default:r.buyer.email }} — {{ r.score }}/5 — {{ r.created_at }}</div>
+            <div>{{ r.comment }}</div>
+        </div>
+    {% empty %}
+        <p class="text-muted">Pas encore d'avis.</p>
+    {% endfor %}
+</div>
+{% endblock %}
