@@ -381,3 +381,44 @@ button {
     box-shadow: 0 20px 50px rgba(230, 57, 47, 0.18);
     border-color: rgba(230, 57, 47, 0.5);
 }
+
+/* Responsive tweaks */
+@media (max-width: 992px) {
+    .main-shell {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .hero-panel {
+        border-width: 1px;
+    }
+    .card-hover:hover,
+    .kpi-card:hover,
+    .mini-panel:hover {
+        transform: translateY(-2px);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-panel {
+        padding: 1.25rem;
+        border-radius: 12px;
+    }
+    .kpi-card {
+        padding: 14px;
+        margin-bottom: 10px;
+    }
+    .kpi-value {
+        font-size: 1.4rem;
+    }
+    .pill,
+    .chip {
+        font-size: 0.9rem;
+        padding: 6px 10px;
+    }
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    .list-group-item {
+        padding: 0.6rem 0.75rem;
+    }
+}
