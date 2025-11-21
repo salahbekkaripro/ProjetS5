@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import base64
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Iterable
 
 from django.conf import settings
@@ -7,13 +10,34 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-BRAND_CONTEXT = {
+BRAND_BASE = {
     "name": "FitTrackR",
     "primary": "#e6392f",
     "secondary": "#2563eb",
     "accent": "#12b886",
     "text": "#0f172a",
 }
+
+
+@lru_cache(maxsize=1)
+def _logo_data_uri() -> str | None:
+    """
+    Load the local logo as a data URI for embedding in emails.
+    """
+    logo_path = Path(settings.BASE_DIR) / "image.png"
+    if not logo_path.exists():
+        return None
+    data = logo_path.read_bytes()
+    encoded = base64.b64encode(data).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
+
+
+def _brand_context() -> dict[str, Any]:
+    ctx = dict(BRAND_BASE)
+    logo_data = _logo_data_uri()
+    if logo_data:
+        ctx["logo_data"] = logo_data
+    return ctx
 
 
 def send_templated_email(
@@ -33,7 +57,7 @@ def send_templated_email(
     else:
         to_list = list(to_emails)
 
-    ctx = {"brand": BRAND_CONTEXT}
+    ctx = {"brand": _brand_context()}
     if context:
         ctx.update(context)
 

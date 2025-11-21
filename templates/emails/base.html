@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="color-scheme" content="light">
     <title>{{ brand.name|default:"FitTrackR" }}</title>
     {% with brand_name=brand.name|default:"FitTrackR" brand_primary=brand.primary|default:"#e6392f" brand_secondary=brand.secondary|default:"#2563eb" brand_accent=brand.accent|default:"#12b886" brand_text=brand.text|default:"#0f172a" %}
     <style>
@@ -17,10 +18,13 @@
             background: radial-gradient(circle at 10% 20%, #e2e8f0 0%, #f8fafc 35%, #f1f5f9 70%);
             font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
             color: var(--text);
+            -webkit-font-smoothing: antialiased;
         }
+        a { color: var(--primary); }
         .container {
             width: 100%;
             max-width: 640px;
+            width: calc(100% - 32px);
             margin: 0 auto;
             background: #ffffff;
             border-radius: 18px;
@@ -29,7 +33,7 @@
             overflow: hidden;
         }
         .hero {
-            padding: 26px 32px 16px;
+            padding: 22px 32px 14px;
             background: linear-gradient(135deg, #ffffff, #f4f6fb);
             color: var(--text);
             position: relative;
@@ -48,12 +52,20 @@
         }
         .brand {
             display: flex;
-            align-items: baseline;
-            gap: 8px;
+            align-items: center;
+            gap: 10px;
             font-weight: 800;
             letter-spacing: 0.6px;
             font-size: 24px;
             color: var(--text);
+        }
+        .logo-img {
+            height: 48px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(37,99,235,0.15);
+            vertical-align: middle;
+            display: block;
         }
         .brand-name {
             background: linear-gradient(90deg, var(--primary), #f97316);
@@ -92,12 +104,14 @@
             display: inline-block;
             padding: 12px 18px;
             border-radius: 12px;
-            background: linear-gradient(120deg, var(--primary), #f97316);
+            background: linear-gradient(120deg, var(--primary), #f97316) !important;
             color: #fff !important;
             text-decoration: none;
             font-weight: 700;
             letter-spacing: 0.2px;
             box-shadow: 0 16px 40px rgba(230, 57, 47, 0.32);
+            border: 1px solid rgba(255,255,255,0.18);
+            -webkit-text-fill-color: #fff !important;
         }
         .muted { color: #475569; }
         .footer {
@@ -113,12 +127,19 @@
             border-radius: 10px;
             display: inline-block;
         }
+        @media (prefers-color-scheme: dark) {
+            body, .container, .hero, .card { background: #ffffff !important; color: var(--text) !important; }
+            .btn { color: #fff !important; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="hero">
             <div class="brand">
+                {% if brand.logo_data %}
+                    <img class="logo-img" src="{{ brand.logo_data }}" alt="{{ brand_name }}">
+                {% endif %}
                 <div class="brand-name">{{ brand_name }}</div>
             </div>
             <div class="pill">Coaching & tracking</div>
