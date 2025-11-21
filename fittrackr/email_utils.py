@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable
@@ -66,6 +67,29 @@ def send_templated_email(
         text_body = render_to_string(text_template, ctx)
     else:
         text_body = strip_tags(html_body)
+
+    # Priorité à l'API SendGrid si la clé est fournie (plus fiable que SMTP sur certains hosts)
+    sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
+    if sendgrid_api_key:
+        try:
+            from sendgrid import SendGridAPIClient
+            from sendgrid.helpers.mail import Mail
+
+            sg_message = Mail(
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to_emails=to_list,
+                subject=subject,
+                html_content=html_body,
+                plain_text_content=text_body,
+            )
+            if reply_to:
+                sg_message.reply_to = reply_to[0]
+            sg = SendGridAPIClient(sendgrid_api_key)
+            sg.send(sg_message)
+            return 1
+        except Exception:
+            # En cas d'échec SendGrid, on laisse la voie SMTP tenter d'envoyer ou lever l'erreur.
+            pass
 
     msg = EmailMultiAlternatives(
         subject=subject,
