@@ -1,0 +1,5 @@
+Bienvenue {{ user.full_name|default:user.email }} !
+
+Ton espace FitTrackR est prêt. Un plan Free t'attend pour démarrer.
+
+Ouvre ton dashboard : {{ cta_url }}

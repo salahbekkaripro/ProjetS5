@@ -8,6 +8,8 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from fittrackr.email_utils import send_templated_email
+
 from .forms import FriendRequestForm, MessageForm
 from .models import FriendRequest, Friendship, Message
 
@@ -16,6 +18,37 @@ User = get_user_model()
 
 def _friends(user):
     return Friendship.friends_for(user)
+
+
+def _send_friend_request_email(request, sender, receiver, friend_request):
+    accept_url = request.build_absolute_uri(reverse("messaging:accept_friend_request", args=[friend_request.id]))
+    inbox_url = request.build_absolute_uri(reverse("messaging:inbox"))
+    send_templated_email(
+        subject="Nouvelle demande d'ami sur FitTrackR",
+        to_emails=receiver.email,
+        template_name="emails/friend_request.html",
+        context={
+            "sender_name": sender.full_name or sender.email,
+            "sender_email": sender.email,
+            "accept_url": accept_url,
+            "inbox_url": inbox_url,
+        },
+    )
+
+
+def _send_friend_accept_email(request, accepter, requester):
+    inbox_url = request.build_absolute_uri(reverse("messaging:inbox"))
+    conversation_url = request.build_absolute_uri(reverse("messaging:conversation", args=[accepter.id]))
+    send_templated_email(
+        subject="Votre demande d'ami a été acceptée",
+        to_emails=requester.email,
+        template_name="emails/friend_request_accepted.html",
+        context={
+            "receiver_name": accepter.full_name or accepter.email,
+            "inbox_url": inbox_url,
+            "conversation_url": conversation_url,
+        },
+    )
 
 
 @login_required
@@ -95,11 +128,14 @@ def send_friend_request(request):
     if existing_inverse:
         existing_inverse.accept()
         messages.success(request, f"Vous avez accepté automatiquement la demande de {user_to_add.email}.")
+        _send_friend_accept_email(request, accepter=request.user, requester=user_to_add)
         return redirect("messaging:conversation", user_id=user_to_add.id)
 
     fr, created = FriendRequest.objects.get_or_create(sender=request.user, receiver=user_to_add)
+    notify_pending = False
     if created:
         messages.success(request, f"Demande envoyée à {user_to_add.email}.")
+        notify_pending = True
     else:
         if fr.status == FriendRequest.Status.PENDING:
             messages.info(request, "Une demande est déjà en attente.")
@@ -109,6 +145,10 @@ def send_friend_request(request):
             fr.status = FriendRequest.Status.PENDING
             fr.save(update_fields=["status"])
             messages.success(request, f"Demande renvoyée à {user_to_add.email}.")
+            notify_pending = True
+
+    if notify_pending:
+        _send_friend_request_email(request, sender=request.user, receiver=user_to_add, friend_request=fr)
 
     return redirect("messaging:inbox")
 
@@ -119,6 +159,7 @@ def accept_friend_request(request, pk):
     with transaction.atomic():
         fr.accept()
     messages.success(request, f"Vous êtes maintenant ami avec {fr.sender.email}.")
+    _send_friend_accept_email(request, accepter=request.user, requester=fr.sender)
     return redirect("messaging:inbox")
 
 

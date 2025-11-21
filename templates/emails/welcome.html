@@ -1,0 +1,10 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2 style="margin:0 0 8px 0;">Bienvenue {{ user.full_name|default:user.email }} !</h2>
+<p class="muted" style="margin:0 0 16px 0;">Ton espace FitTrackR est prêt. Tu peux suivre tes entraînements, tes programmes et tes progrès dès maintenant.</p>
+<div class="card">
+    <p style="margin:0 0 10px 0;">On t'a déjà créé un plan <strong>Free</strong> pour commencer. Passe au dashboard pour découvrir les modules, ajouter tes workouts et inviter des amis.</p>
+    <a class="btn" href="{{ cta_url }}">Ouvrir mon dashboard</a>
+    <p class="muted" style="margin:12px 0 0 0;">Ou copie ce lien :<br><span class="code">{{ cta_url }}</span></p>
+</div>
+{% endblock %}

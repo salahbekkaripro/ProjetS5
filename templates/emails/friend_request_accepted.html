@@ -1,0 +1,10 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2 style="margin:0 0 8px 0;">C'est validé !</h2>
+<p class="muted" style="margin:0 0 14px 0;">{{ receiver_name }} a accepté ta demande d'ami.</p>
+<div class="card">
+    <p style="margin:0 0 12px 0;">Vous pouvez maintenant discuter et partager vos séances.</p>
+    <a class="btn" href="{{ conversation_url }}">Ouvrir la conversation</a>
+    <p class="muted" style="margin:12px 0 0 0;">Accéder à la messagerie : <span class="code">{{ inbox_url }}</span></p>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2 style="margin:0 0 8px 0;">Nouvelle demande d'ami</h2>
+<p class="muted" style="margin:0 0 14px 0;">{{ sender_name }} souhaite se connecter avec toi sur {{ brand.name }}.</p>
+<div class="card">
+    <p style="margin:0 0 10px 0;">Email : <strong>{{ sender_email }}</strong></p>
+    <p style="margin:0 0 12px 0;">Accepte pour pouvoir discuter et suivre vos progrès ensemble.</p>
+    <a class="btn" href="{{ accept_url }}">Accepter la demande</a>
+    <p class="muted" style="margin:12px 0 0 0;">Ou gère tes demandes : <span class="code">{{ inbox_url }}</span></p>
+</div>
+{% endblock %}
